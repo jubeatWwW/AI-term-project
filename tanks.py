@@ -2130,7 +2130,6 @@ class Game():
             mapinfo=self.get_mapinfo()
 
             while p_mapinfo.empty() == False:
-                print p_mapinfo.empty()
                 p_mapinfo.get(mapinfo)
 
             p_mapinfo.put(mapinfo)
