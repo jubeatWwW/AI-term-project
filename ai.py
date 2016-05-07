@@ -105,6 +105,13 @@ class ai_agent():
         while True:
             self.Get_mapInfo(p_mapinfo)
 
+            q = 0
+            for i in range(50000):
+                q += 1
+            del q
+
+            print self.mapinfo[1]
+
             pointMap = [[0 for j in range(0, 26)] for i in range(0, 26)]
             for i in self.mapinfo[2]:
                 if i[1] == 1:
@@ -112,19 +119,16 @@ class ai_agent():
                 elif i[1] == 2:
                     pointMap[i[0][0]/16][i[0][1]/16] = 2
 
-            q = 0
-            for i in range(10000000):
-                q += 1
-            del q
-
             move_dir = self.checkEnemy()
             # print move_dir
             shoot = 0
             if move_dir != STOP:
                 shoot = 1
+            else:
+                pass
 
             print "shoot:"+str(shoot)
-            keep_action = 1
+            keep_action = 0
             self.Update_Strategy(c_control, shoot, move_dir, keep_action)
             del pointMap
 
