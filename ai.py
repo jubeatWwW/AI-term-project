@@ -24,8 +24,11 @@ class ai_agent():
     targetPointY = 0
     targetX = 0
     targetY = 0
-    stockCounter = 1000
+    stockCounter = 300
     lastPos = [0, 0]
+    isStock = False
+    goBack = STOP
+    goBackCnt = 10
 
     def __init__(self):
         self.mapinfo = []
@@ -54,6 +57,15 @@ class ai_agent():
         self.playerPointX = self.playerX / 16
         self.playerPointY = self.playerY / 16
 
+        if self.isStock:
+            if self.goBackCnt > 0:
+                self.goBackCnt -= 1
+                return self.goBack
+            else:
+                self.goBackCnt = 10
+                self.isStock = False
+                self.stockCounter = 300
+
         minDistance = 400000
         move_dir = STOP
 
@@ -71,7 +83,7 @@ class ai_agent():
                 self.targetPointY = self.targetY / 16
 
             if disX < 80 and disY < 80:
-                print "both"
+                # print "both"
                 if disX > disY:
                     if disY < 24:
                         if self.playerX > i[0][0]:
@@ -95,13 +107,13 @@ class ai_agent():
                         else:
                             move_dir = RIGHT
             elif disX < 80:
-                print "a"
+                # print "a"
                 if self.playerY > i[0][1]:
                     move_dir = UP
                 else:
                     move_dir = DOWN
             elif disY < 80:
-                print "b"
+                # print "b"
                 if self.playerX > i[0][0]:
                     move_dir = LEFT
                 else:
@@ -110,13 +122,19 @@ class ai_agent():
                 continue
 
         if minDistance < (24*24*2) and self.stockCounter <= 0:
+            self.isStock = True
+            self.goBack = OPPSITE[self.mapinfo[3][0][1]]
             return OPPSITE[self.mapinfo[3][0][1]]
 
-        if self.lastPos[0] == self.playerX and self.lastPos[1] == self.playerY:
-            self.stockCounter -= 1
+        # print self.lastPos
+        print self.stockCounter
+        if self.lastPos[0] == self.playerX and \
+            self.lastPos[1] == self.playerY and \
+                minDistance < (24*24*2):
+                self.stockCounter -= 1
         else:
             self.lastPos = [self.playerX, self.playerY]
-            self.stockCounter = 1000
+            self.stockCounter = 300
 
         if self.playerY >= CASTLE['y'][0]-32 and \
                 self.playerY <= CASTLE['y'][1]+32:
@@ -176,6 +194,7 @@ class ai_agent():
                 q += 1
             del q
 
+            print self.mapinfo[3]
             shoot = 0
             enemy_dir = self.checkEnemy()
             move_dir = self.pathFinder(enemy_dir)
@@ -183,7 +202,7 @@ class ai_agent():
             if move_dir != STOP:
                 shoot = 1
 
-            print "shoot:"+str(shoot)
+            # print "shoot:"+str(shoot)
             keep_action = 0
             self.Update_Strategy(c_control, shoot, move_dir, keep_action)
             del self.pointMap
