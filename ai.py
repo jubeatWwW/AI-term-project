@@ -9,6 +9,7 @@ DOWN = 2
 LEFT = 3
 STOP = 4
 DP = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+OPPSITE = [DOWN, LEFT, UP, RIGHT]
 CASTLE = {'x': [192, 224], 'y': [384, 416]}
 
 
@@ -19,6 +20,12 @@ class ai_agent():
     playerPointY = 0
     playerX = 0
     playerY = 0
+    targetPointX = 0
+    targetPointY = 0
+    targetX = 0
+    targetY = 0
+    stockCounter = 1000
+    lastPos = [0, 0]
 
     def __init__(self):
         self.mapinfo = []
@@ -44,8 +51,8 @@ class ai_agent():
     def checkEnemy(self):
         self.playerX = self.mapinfo[3][0][0][0]
         self.playerY = self.mapinfo[3][0][0][1]
-        self.playerPointX = playerX / 16
-        self.playerPointY = playerY / 16
+        self.playerPointX = self.playerX / 16
+        self.playerPointY = self.playerY / 16
 
         minDistance = 400000
         move_dir = STOP
@@ -58,6 +65,10 @@ class ai_agent():
                 continue
             else:
                 minDistance = (disX * disX) + (disY * disY)
+                self.targetX = i[0][0]
+                self.targetY = i[0][1]
+                self.targetPointX = self.targetX / 16
+                self.targetPointY = self.targetY / 16
 
             if disX < 80 and disY < 80:
                 print "both"
@@ -98,18 +109,31 @@ class ai_agent():
             else:
                 continue
 
-        if self.playerY >= CASTLE['y'][0]-16 and self.playerY <= CASTLE['y'][1]+16:
+        if minDistance < (24*24*2) and self.stockCounter <= 0:
+            return OPPSITE[self.mapinfo[3][0][1]]
+
+        if self.lastPos[0] == self.playerX and self.lastPos[1] == self.playerY:
+            self.stockCounter -= 1
+        else:
+            self.lastPos = [self.playerX, self.playerY]
+            self.stockCounter = 1000
+
+        if self.playerY >= CASTLE['y'][0]-32 and \
+                self.playerY <= CASTLE['y'][1]+32:
             if move_dir == LEFT and self.playerX > CASTLE['x'][1]:
                 move_dir = STOP
             elif move_dir == RIGHT and self.playerX < CASTLE['x'][0]:
                 move_dir = STOP
         elif move_dir == DOWN:
-            if self.playerX >= CASTLE['x'][0]-32 and self.playerX <= CASTLE['x'][1]+32:
+            if self.playerX >= CASTLE['x'][0]-32 and \
+                    self.playerX <= CASTLE['x'][1]+32:
                 move_dir = STOP
 
         return move_dir
 
     def pathFinder(self, enemy_dir):
+        ret_dir = enemy_dir
+
         self.pointMap = [[0 for j in range(0, 26)] for i in range(0, 26)]
         for i in self.mapinfo[2]:
             if i[1] == 1:
@@ -118,9 +142,29 @@ class ai_agent():
                 self.pointMap[i[0][0]/16][i[0][1]/16] = 2
 
         if not enemy_dir == STOP:
-            mapX = self.playerPointX
-            mapY = self.playerPointY
+            mapX = (self.playerX) / 16
+            mapY = (self.playerY) / 16
+            while mapX != self.targetPointX and mapY != self.targetPointY:
+                if enemy_dir == LEFT or enemy_dir == RIGHT:
+                    if self.pointMap[mapX][mapY] == 2 or \
+                            self.pointMap[mapX][mapY+1] == 2:
+                        ret_dir = STOP
+                        break
+                else:
+                    if self.pointMap[mapX][mapY] == 2 or \
+                            self.pointMap[mapX+1][mapY] == 2:
+                        ret_dir = STOP
+                        break
 
+                mapX += DP[enemy_dir][0]
+                mapY += DP[enemy_dir][1]
+
+                if mapX < 0 or mapX > 25:
+                    break
+                elif mapY < 0 or mapY > 25:
+                    break
+
+        return ret_dir
 
     def operations(self, p_mapinfo, c_control):
 
