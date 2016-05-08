@@ -31,6 +31,9 @@ class ai_agent():
     goBackCnt = 75
     pathStockCounter = 100
     pathLastPos = (0, 0)
+    isDFS = False
+    lastDfsDir = 0
+    nextPos = (0, 0)
 
     def __init__(self):
         self.mapinfo = []
@@ -259,6 +262,7 @@ class ai_agent():
                 break
 
         del visited
+        self.nextPos = (stack[0][0], stack[0][1])
         if stack[0][0] != self.playerPointX:
             if stack[0][0] < self.playerPointX:
                 return LEFT
@@ -316,35 +320,26 @@ class ai_agent():
                     shoot = 0
 
             if move_dir == STOP and len(self.mapinfo[1]) > 0:
-                move_dir = self.DFS()
-                shoot = 1
-                if self.pathLastPos == (self.playerX, self.playerY):
-                    self.pathStockCounter -= 1
-                else:
-                    self.pathStockCounter = 100
+                if not self.isDFS:
+                    move_dir = self.DFS()
+                    self.isDSF = True
+                    shoot = 1
+                    self.lastDfsDir = move_dir
 
-            if self.pathStockCounter <= 0:
-                self.pathStockCounter = 100
-                if move_dir == LEFT:
-                    if abs(self.playerY - 16*self.playerPointY) < 8:
-                        move_dir = DOWN
-                    else:
-                        move_dir = UP
-                elif move_dir == RIGHT:
-                    if abs(self.playerY - 16*self.playerPointY) < 8:
-                        move_dir = UP
-                    else:
-                        move_dir = DOWN
-                elif move_dir == UP:
-                    if abs(self.playerX - 16*self.playerPointX) < 8:
-                        move_dir = RIGHT
-                    else:
-                        move_dir = LEFT
-                elif move_dir == DOWN:
-                    if abs(self.playerX - 16*self.playerPointX) < 8:
-                        move_dir = LEFT
-                    else:
-                        move_dir = RIGHT
+            if self.isDFS:
+                move_dir = self.lastDfsDir
+                if self.lastDfsDir == LEFT:
+                    if abs(self.playerX - self.nextPos[0]) < 4:
+                        self.isDFS = False
+                elif self.lastDfsDir == RIGHT:
+                    if abs(self.playerX - self.nextPos[0]) < 30:
+                        self.isDFS = False
+                elif self.lastDfsDir == UP:
+                    if abs(self.playerY - self.nextPos[1]) < 4:
+                        self.isDFS = False
+                elif self.lastDfsDir == DOWN:
+                    if abs(self.playerY - self.nextPos[1]) < 30:
+                        self.isDFS = False
 
             if len(self.mapinfo[1]) == 0:
                 move_dir = UP
