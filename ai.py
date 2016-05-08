@@ -29,6 +29,8 @@ class ai_agent():
     isStock = False
     goBack = STOP
     goBackCnt = 75
+    pathStockCounter = 100
+    pathLastPos = (0, 0)
 
     def __init__(self):
         self.mapinfo = []
@@ -287,8 +289,6 @@ class ai_agent():
                     if i[0][1] < self.playerY + 26:
                         return STOP
 
-
-
     def operations(self, p_mapinfo, c_control):
 
         while True:
@@ -314,9 +314,38 @@ class ai_agent():
                 if self.playerX >= CASTLE['x'][0] and \
                         self.playerX <= CASTLE['x'][1]:
                     shoot = 0
+
             if move_dir == STOP and len(self.mapinfo[1]) > 0:
                 move_dir = self.DFS()
                 shoot = 1
+                if self.pathLastPos == (self.playerX, self.playerY):
+                    self.pathStockCounter -= 1
+                else:
+                    self.pathStockCounter = 100
+
+            if self.pathStockCounter <= 0:
+                self.pathStockCounter = 100
+                if move_dir == LEFT:
+                    if abs(self.playerY - 16*self.playerPointY) < 8:
+                        move_dir = DOWN
+                    else:
+                        move_dir = UP
+                elif move_dir == RIGHT:
+                    if abs(self.playerY - 16*self.playerPointY) < 8:
+                        move_dir = UP
+                    else:
+                        move_dir = DOWN
+                elif move_dir == UP:
+                    if abs(self.playerX - 16*self.playerPointX) < 8:
+                        move_dir = RIGHT
+                    else:
+                        move_dir = LEFT
+                elif move_dir == DOWN:
+                    if abs(self.playerX - 16*self.playerPointX) < 8:
+                        move_dir = LEFT
+                    else:
+                        move_dir = RIGHT
+
             if len(self.mapinfo[1]) == 0:
                 move_dir = UP
 
