@@ -268,6 +268,27 @@ class ai_agent():
             else:
                 return DOWN
 
+    def bulletCheck(self, move_dir):
+        if move_dir == STOP:
+            return STOP
+        for i in self.mapinfo[0]:
+            if i[1] == UP or i[1] or DOWN:
+                if move_dir == LEFT:
+                    if i[0][0] > self.playerX - 26:
+                        return STOP
+                elif move_dir == RIGHT:
+                    if i[0][0] < self.playerX + 26:
+                        return STOP
+            elif i[1] == RIGHT or i[1] == LEFT:
+                if move_dir == UP:
+                    if i[0][1] > self.playerY - 26:
+                        return STOP
+                elif move_dir == DOWN:
+                    if i[0][1] < self.playerY + 26:
+                        return STOP
+
+
+
     def operations(self, p_mapinfo, c_control):
 
         while True:
@@ -298,6 +319,8 @@ class ai_agent():
                 shoot = 1
             if len(self.mapinfo[1]) == 0:
                 move_dir = UP
+
+            # bullet_avoid = self.bulletCheck(move_dir)
 
             # print "shoot:"+str(shoot)
             keep_action = 0
